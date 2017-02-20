@@ -1,0 +1,23 @@
+{
+  "name": "Yike",
+  "homepage": "https://github.com/hushiking/Yike",
+  "authors": [
+    "hushiking <hushiking@163.com>"
+  ],
+  "description": "豆瓣一刻",
+  "main": "app.js",
+  "keywords": [
+    "AngularJS"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "less": "^2.7.2"
+  }
+}
