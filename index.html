@@ -47,8 +47,100 @@
 	<!-- 引入angularjs -->
 	<script src="./bower_components/angular/angular.js"></script>
 	<script src="./bower_components/angular-route/angular-route.js"></script>
-	<script src="./scripts/app.js"></script>
+	<!-- <script src="./scripts/app.js"></script>
 	<script src="./scripts/controllers.js"></script>
-	<script src="./scripts/directives.js"></script>
+	<script src="./scripts/directives.js"></script> -->
+	<script>
+		var Yike = angular.module('Yike', ['ngRoute'])
+		Yike.config(['$routeProvider', function($routeProvider) {
+			$routeProvider.when('/', {
+				templateUrl: './views/today.html',
+				controller: 'TodayController'
+			})
+			.when('/older', {
+				templateUrl: './views/older.html',
+				controller: 'OlderController'
+			})
+			.otherwise({
+				redirectTo: '/today'
+			})
+		}])
+		// 直接运行根作用域,添加全局属性或方法
+		Yike.run(['$rootScope', function($rootScope) {
+			$rootScope.collapsed = false
+			$rootScope.toggle = function() {
+				// 切换导航菜单
+				$rootScope.collapsed = !$rootScope.collapsed
+				var navs = document.querySelectorAll('.navs dd')
+				if($rootScope.collapsed) {
+					// 显示导航栏
+					angular.forEach(navs, function(val, key) {
+						val.style.transitionDuration = 0.3 * key + 's'
+						val.style.transitionDelay = '0.3s'
+						val.style.transform = 'translate(0)'
+					})
+				} else {
+					// 隐藏导航栏
+					var len = navs.length -1
+					angular.forEach(navs, function(val, key) {
+						// len - key
+						navs[len - key].style.transitionDuration = key * 0.3 + 's'
+						navs[len - key].style.transform = 'translate(-100%)'
+						navs[len - key].style.transitionDelay = '0'
+					})
+				}
+			}
+		}])
+
+		Yike.controller('NavsController', ['$scope', function($scope) {
+			$scope.navs = [
+				{link: '#/today', text: '今日一刻', icon: 'icon-home'},
+				{link: '#/older', text: '往期内容', icon: 'icon-file-empty'},
+				{link: '#/older', text: '热门作者', icon: 'icon-pencil'},
+				{link: '#/older', text: '栏目浏览', icon: 'icon-menu'},
+				{link: '#/older', text: '我的喜欢', icon: 'icon-heart'},
+				{link: '#/older', text: '设置', icon: 'icon-cog'}
+			]
+		}])
+
+		Yike.controller('TodayController', ['$scope', '$http', '$rootScope', function($scope, $http, $rootScope) {
+
+			$rootScope.loaded = false
+			// 异步请求
+			$http({
+				url: './api/today.php',
+				// method: '',
+				// params: {}
+			}).success(function(info) {
+				// info 返回的数据
+				// 获取到的数据
+				$scope.posts = info.posts
+				$scope.date = info.date
+				$rootScope.loaded = true
+			})
+		}])
+
+		// 往期内容
+		Yike.controller('OlderController', ['$scope', '$http', '$rootScope', function($scope, $http, $rootScope) {
+			$rootScope.loaded = false
+			$http({
+				url: './api/older.php',
+				method: 'get',
+				params: {}
+			}).success(function(info) {
+				$scope.posts = info.posts
+				$rootScope.loaded = true
+			})
+		}])
+
+		// 自定义指令
+		Yike.directive('loading', function() {
+			return {
+				restrict: 'ECMA',
+				replace: 'true',
+				template: '<img src="" alt="" />'
+			}
+		})
+	</script>
 </body>
 </html>
