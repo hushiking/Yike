@@ -1,7 +1,7 @@
 
 	<div class="item">
 		<!-- 日期分类 -->
-		<div class="mark" ng-show="loaded">13Aug</div>
+		<div class="mark" ng-show="loaded">{{date|date: 'yyyy-MM-dd'}}</div>
 		<ul class="posts">
 			<!-- 文章 -->
 			<li ng-repeat="post in posts">

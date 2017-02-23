@@ -19,7 +19,7 @@
 					</div>
 					<span>登录</span>
 				</dt>
-				<dd class="active" ng-repeat="nav in navs">
+				<dd ng-class="{active: $index == index}" ng-repeat="nav in navs">
 					<a href="{{nav.link}}" ng-click="toggle()" class="{{nav.icon}}">
 						<span>{{nav.text}}</span>
 					</a>
@@ -34,7 +34,7 @@
 			<!-- 头部 -->
 			<div ng-class="{header: true, collapse: collapsed}">
 				<a href="javascript:;" ng-click="toggle()" class="menu icon-menu"></a>
-				<h2>今日一刻</h2>
+				<h2>{{title}}</h2>
 				<a href="javascript:;" class="search icon-search"></a>
 			</div>
 			<!-- 容器 -->
@@ -53,13 +53,17 @@
 	<script>
 		var Yike = angular.module('Yike', ['ngRoute'])
 		Yike.config(['$routeProvider', function($routeProvider) {
-			$routeProvider.when('/', {
+			$routeProvider.when('/today', {
 				templateUrl: './views/today.html',
 				controller: 'TodayController'
 			})
 			.when('/older', {
 				templateUrl: './views/older.html',
 				controller: 'OlderController'
+			})
+			.when('/hot', {
+				templateUrl: './views/author.html',
+				controller: 'HotController'
 			})
 			.otherwise({
 				redirectTo: '/today'
@@ -96,21 +100,27 @@
 			$scope.navs = [
 				{link: '#/today', text: '今日一刻', icon: 'icon-home'},
 				{link: '#/older', text: '往期内容', icon: 'icon-file-empty'},
-				{link: '#/older', text: '热门作者', icon: 'icon-pencil'},
-				{link: '#/older', text: '栏目浏览', icon: 'icon-menu'},
-				{link: '#/older', text: '我的喜欢', icon: 'icon-heart'},
-				{link: '#/older', text: '设置', icon: 'icon-cog'}
+				{link: '#/hot', text: '热门作者', icon: 'icon-pencil'},
+				{link: '#/', text: '栏目浏览', icon: 'icon-menu'},
+				{link: '#/', text: '我的喜欢', icon: 'icon-heart'},
+				{link: '#/', text: '设置', icon: 'icon-cog'}
 			]
 		}])
 
-		Yike.controller('TodayController', ['$scope', '$http', '$rootScope', function($scope, $http, $rootScope) {
+		// 今日一刻
+		Yike.controller('TodayController', ['$scope', '$http', '$rootScope', '$filter', function($scope, $http, $rootScope, $filter) {
 
 			$rootScope.loaded = false
+			$rootScope.title = '今日一刻'
+			$rootScope.index = 0
+			var today = new Date;
+			var date = $filter('date')
+			today = date(today, 'yyyy-MM-dd')
 			// 异步请求
 			$http({
 				url: './api/today.php',
-				// method: '',
-				// params: {}
+				method: 'get',
+				params: {today: today}
 			}).success(function(info) {
 				// info 返回的数据
 				// 获取到的数据
@@ -123,12 +133,35 @@
 		// 往期内容
 		Yike.controller('OlderController', ['$scope', '$http', '$rootScope', function($scope, $http, $rootScope) {
 			$rootScope.loaded = false
+			$rootScope.title = '往期内容'
+			$rootScope.index = 1
+
+			$scope.day = 1
+
 			$http({
 				url: './api/older.php',
 				method: 'get',
-				params: {}
+				params: {day: $scope.day}
 			}).success(function(info) {
-				$scope.posts = info.posts
+				$scope.day = info.day
+				$scope.posts = info.result.posts
+				$scope.date = info.result.date
+				$scope.time = info.time
+				$rootScope.loaded = true
+			})
+		}])
+
+		// 热门作者
+		Yike.controller('HotController', ['$scope', '$http', '$rootScope', function($scope, $http, $rootScope) {
+			$rootScope.title = '热门作者'
+			$rootScope.index = 2
+			$rootScope.loaded = false
+
+			$http({
+				url: './api/author.php'
+			}).success(function(info) {
+				$scope.rec = info.rec.authors
+				$scope.all = info.all.authors
 				$rootScope.loaded = true
 			})
 		}])
